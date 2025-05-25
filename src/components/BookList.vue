@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Book List</h1>
+    <h1>Book List Test</h1>
     <ul>
       <li v-for="book in books" :key="book.id">
         {{ book.title }} by {{ book.author }} - Rating: {{ book.rating }}
