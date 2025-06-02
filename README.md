@@ -1,6 +1,6 @@
 ## Book Review App for one's self.
 
-A side-project for when I find the free time to enhance my knowledge on development for phones.
+A project for myself in the future to look back from where I started.
 
 Still in development.
 
