@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Knewave&display=swap" rel="stylesheet">  
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Book Review App</title>
@@ -11,18 +14,6 @@
 <source src="/Background.mp4" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
-
-
-<template>
-
-  <div class="book-list">
-    <div class="book-card" v-for="book in books" :key="book.id">
-      <h3>{{ book.title }}</h3>
-      <p>{{ book.author }}</p>
-    </div>
-  </div>
-
-</template>
 
 <style scoped>
 
