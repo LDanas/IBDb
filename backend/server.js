@@ -41,5 +41,40 @@ app.post('/login', async (req, res) => {
   res.json({ token });
 });
 
+// Book schema
+const bookSchema = new mongoose.Schema({
+  username: String,
+  title: String,
+  author: String,
+  year: String,
+  coverId: String,
+});
+const Book = mongoose.model('Book', bookSchema);
+
+// Add Book route
+app.post('/add-book', async (req, res) => {
+  const { username, title, author, year, coverId } = req.body;
+  await Book.create({ username, title, author, year, coverId });
+  res.json({ success: true });
+});
+
+// Get User's Books route
+app.get('/my-books', async (req, res) => {
+  const { username } = req.query;
+  const books = await Book.find({ username });
+  res.json({ books });
+});
+
+// Delete Book route
+app.post('/delete-book', async (req, res) => {
+  const { id } = req.body;
+  try {
+    await Book.findByIdAndDelete(id);
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
 // Start server
 app.listen(5000, () => console.log('Server running on http://localhost:5000'));

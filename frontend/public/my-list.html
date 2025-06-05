@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Book List | IBDb</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        min-height: 100vh;
+        /* Gradient animation using 4 gold-like colors */
+        background: linear-gradient(270deg, #FFD700, #FFB300, #FFF8DC, #FFC300);
+        background-size: 800% 800%;
+        animation: gradientFlow 18s ease infinite;
+      }
+      @keyframes gradientFlow {
+        0% {background-position: 0% 50%;}
+        25% {background-position: 50% 100%;}
+        50% {background-position: 100% 50%;}
+        75% {background-position: 50% 0%;}
+        100% {background-position: 0% 50%;}
+      }
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(255,255,255,0.10);
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0.5rem 0;
+        z-index: 50;
+      }
+      .nav-btn {
+        font-family: 'Arial Black', Arial, sans-serif;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1.2rem;
+        margin: 0 0.2rem;
+        cursor: pointer;
+        transition: transform 0.08s;
+      }
+      .nav-btn:active {
+        transform: scale(0.96);
+      }
+      .btn-one { background: linear-gradient(90deg, #FFD700 0%, #FFB300 100%); color: #222; }
+      .btn-two { background: linear-gradient(90deg, #FFC300 0%, #FFF8DC 100%); color: #222; }
+      .btn-three { background: linear-gradient(90deg, #FFB300 0%, #FFD700 100%); color: #222; }
+      .btn-four { background: linear-gradient(90deg, #FFF8DC 0%, #FFC300 100%); color: #222; }
+      .btn-profile { background: #B8860B; color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 bg-opacity-60 relative z-10 pb-20">
+      <h1 class="text-3xl font-bold mb-6">My Book List</h1>
+    <div id="bookList" class="w-full flex flex-wrap justify-center gap-4 px-4 mt-8"></div>
+    </div>
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-btn btn-one" onclick="goTo('my-list.html')">My List</button>
+      <button class="nav-btn btn-two" onclick="goTo('add-book.html')">Add a Book</button>
+      <button class="nav-btn btn-three" onclick="goTo('delete-book.html')">Delete a Book</button>
+      <button class="nav-btn btn-four" onclick="goTo('edit-book.html')">Edit a Book</button>
+      <button class="nav-btn btn-profile" onclick="goTo('profile.html')">My Profile</button>
+    </nav>
+    <script>
+      // Check if user is logged in
+      if (!localStorage.getItem('username')) {
+        window.location.href = 'login.html';
+      }
+
+      function goTo(page) {
+        window.location.href = page;
+      }
+
+      async function fetchBooks() {
+        const username = localStorage.getItem('username');
+        const res = await fetch(`http://localhost:5000/my-books?username=${encodeURIComponent(username)}`);
+        const data = await res.json();
+        const bookList = document.getElementById('bookList');
+        if (!data.books.length) {
+          bookList.innerHTML = '<p class="text-gray-700 text-center">No books in your list yet.</p>';
+          return;
+        }
+        bookList.innerHTML = data.books.map((book, idx) => {
+          const coverUrl = book.coverId
+            ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
+            : 'https://via.placeholder.com/80x120?text=No+Cover';
+          return `
+            <div class="bg-white bg-opacity-80 rounded shadow p-4 mb-4 flex items-center" id="book-row-${idx}">
+              <img src="${coverUrl}" alt="Book Cover" width="80" height="120" loading="lazy" class="w-20 h-28 object-cover rounded mr-4" />
+              <div class="flex-1">
+                <div class="font-bold">${book.title}</div>
+                <div class="text-sm text-gray-700">${book.author}</div>
+                <div class="text-xs text-gray-500">${book.year ? 'First published: ' + book.year : ''}</div>
+              </div>
+              <button class="ml-4 px-3 py-1 bg-red-500 text-white rounded remove-btn" 
+                data-id="${book._id}" data-idx="${idx}">
+                Remove
+              </button>
+            </div>
+          `;
+        }).join('');
+
+        // Add event listeners for remove buttons
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+          btn.onclick = async function() {
+            const bookId = this.dataset.id;
+            const idx = this.dataset.idx;
+            const res = await fetch(`http://localhost:5000/delete-book`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: bookId })
+            });
+            const result = await res.json();
+            if (result.success) {
+              document.getElementById(`book-row-${idx}`).remove();
+            } else {
+              alert('Failed to remove book.');
+            }
+          }
+        });
+      }
+
+      fetchBooks();
+    </script>
+  </body>
+</html>

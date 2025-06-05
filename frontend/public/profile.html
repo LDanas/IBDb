@@ -24,7 +24,7 @@
         gap: 1rem;
       }
       .btn {
-        font-family: 'Knewave', cursive;
+        font-family: 'arial', sans-serif;
         padding: 0.8rem 2rem;
         font-size: 1.2rem;
         border: none;
@@ -32,20 +32,20 @@
         cursor: pointer;
       }
       .btn-one {
-        background-color: #0786b0;
-        color: rgb(0, 0, 0);
+        background: linear-gradient(90deg, #ff6a00 0%, #ee0979 100%);
+        color: #fff;
       }
       .btn-two {
-        background-color: #07a804;
-        color: rgb(0, 0, 0);
+        background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+        color: #fff;
       }
       .btn-three {
-        background-color: #bb1e16;
-        color: rgb(0, 0, 0);
+        background: linear-gradient(90deg, #fc466b 0%, #3f5efb 100%);
+        color: #fff;
       }
       .btn-four {
-        background-color: #ffea00;
-        color: rgb(0, 0, 0);
+        background: linear-gradient(90deg, #f7971e 0%, #ffd200 100%);
+        color: #222;
       }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Knewave&display=swap" rel="stylesheet">
@@ -63,8 +63,8 @@
         <button class="btn btn-two" onclick="goTo('add-book.html')">Add a Book</button>
         <button class="btn btn-three" onclick="goTo('delete-book.html')">Delete a Book</button>
         <button class="btn btn-four" onclick="goTo('edit-book.html')">Edit a Book</button>
+        <button onclick="logout()" class="btn bg-red-500 text-white mt-4">Logout</button>
       </div>
-      <button onclick="logout()" class="px-4 py-2 bg-red-500 text-white rounded mt-8">Logout</button>
     </div>
     <script>
       // Check if user is logged in

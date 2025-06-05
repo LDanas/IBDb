@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add a Book | IBDb</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        min-height: 100vh;
+        /* Gradient animation using 4 gold-like colors */
+        background: linear-gradient(270deg, #FFD700, #FFB300, #FFF8DC, #FFC300);
+        background-size: 800% 800%;
+        animation: gradientFlow 18s ease infinite;
+      }
+      @keyframes gradientFlow {
+        0% {background-position: 0% 50%;}
+        25% {background-position: 50% 100%;}
+        50% {background-position: 100% 50%;}
+        75% {background-position: 50% 0%;}
+        100% {background-position: 0% 50%;}
+      }
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(255,255,255,0.10); /* More transparent */
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0.5rem 0;
+        z-index: 50;
+      }
+      .nav-btn {
+        font-family: 'Arial Black', Arial, sans-serif;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1.2rem;
+        margin: 0 0.2rem;
+        cursor: pointer;
+        transition: transform 0.08s;
+      }
+      .nav-btn:active {
+        transform: scale(0.96);
+      }
+      .btn-one { background: linear-gradient(90deg, #FFD700 0%, #FFB300 100%); color: #222; }
+      .btn-two { background: linear-gradient(90deg, #FFC300 0%, #FFF8DC 100%); color: #222; }
+      .btn-three { background: linear-gradient(90deg, #FFB300 0%, #FFD700 100%); color: #222; }
+      .btn-four { background: linear-gradient(90deg, #FFF8DC 0%, #FFC300 100%); color: #222; }
+      .btn-profile { background: #B8860B; color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 bg-opacity-60 relative z-10 pb-20">
+      <h1 class="text-3xl font-bold mb-6">Add a Book</h1>
+      <form id="searchForm" class="flex mb-6 w-full max-w-md">
+        <input type="text" id="searchInput" class="flex-1 px-4 py-2 rounded-l border border-gray-300 focus:outline-none text-black" placeholder="Search for a book..." required />
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-r hover:bg-indigo-700">Search</button>
+      </form>
+      <div id="results" class="w-full max-w-md"></div>
+    </div>
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-btn btn-one" onclick="goTo('my-list.html')">My List</button>
+      <button class="nav-btn btn-two" onclick="goTo('add-book.html')">Add a Book</button>
+      <button class="nav-btn btn-three" onclick="goTo('delete-book.html')">Delete a Book</button>
+      <button class="nav-btn btn-four" onclick="goTo('edit-book.html')">Edit a Book</button>
+      <button class="nav-btn btn-profile" onclick="goTo('profile.html')">My Profile</button>
+    </nav>
+    <script>
+      // Check if user is logged in
+      if (!localStorage.getItem('username')) {
+        window.location.href = 'login.html';
+      }
+
+      function goTo(page) {
+        window.location.href = page;
+      }
+
+      document.getElementById('searchForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const query = document.getElementById('searchInput').value;
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = 'Searching...';
+
+        // Fetch from Open Library Search API
+        const res = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        if (!data.docs || data.docs.length === 0) {
+          resultsDiv.innerHTML = '<p class="text-red-500">No results found.</p>';
+          return;
+        }
+
+        // Show results
+        resultsDiv.innerHTML = data.docs.slice(0, 10).map((book, idx) => {
+          const coverId = book.cover_i;
+          let coverHtml;
+          if (coverId) {
+            const coverUrl = `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`;
+            coverHtml = `<img src="${coverUrl}" alt="Book Cover" width="80" height="120" loading="lazy" style="width:80px; height:120px; object-fit:cover;" class="rounded mr-4 mb-2 md:mb-0" />`;
+          } else {
+            coverHtml = `<div class="w-20 h-28 flex items-center justify-center bg-gray-200 text-gray-600 rounded mr-4 mb-2 md:mb-0 text-xs text-center">Cover not found</div>`;
+          }
+
+          // Add a unique id for the status text and button
+          return `
+          <div class="bg-white bg-opacity-80 rounded shadow p-4 mb-4 flex flex-col md:flex-row md:items-center">
+            ${coverHtml}
+            <div class="flex-1">
+              <div class="font-bold">${book.title}</div>
+              <div class="text-sm text-gray-700">${book.author_name ? book.author_name.join(', ') : 'Unknown Author'}</div>
+              <div class="text-xs text-gray-500">${book.first_publish_year ? 'First published: ' + book.first_publish_year : ''}</div>
+            </div>
+            <div class="flex flex-col items-center md:ml-4 mt-2 md:mt-0" style="min-width:90px;">
+              <div id="status-${idx}" class="text-green-600 font-bold w-full text-center" style="display:none; min-width:90px;">Added</div>
+              <button style="margin-top:2px; min-width:90px;" id="add-btn-${idx}" class="px-3 py-1 bg-green-500 text-white rounded add-btn w-full" 
+                data-title="${encodeURIComponent(book.title)}"
+                data-author="${encodeURIComponent(book.author_name ? book.author_name.join(', ') : 'Unknown Author')}"
+                data-year="${book.first_publish_year || ''}"
+                data-coverid="${coverId || ''}">
+                Add
+              </button>
+            </div>
+          </div>
+          `;
+        }).join('');
+
+        // Add event listeners to "Add" buttons
+document.querySelectorAll('.add-btn').forEach((btn, idx) => {
+  btn.onclick = async function() {
+    const title = decodeURIComponent(this.dataset.title);
+    const author = decodeURIComponent(this.dataset.author);
+    const year = this.dataset.year;
+    const coverId = this.dataset.coverid;
+
+    const username = localStorage.getItem('username');
+    const token = localStorage.getItem('token');
+
+    const res = await fetch('http://localhost:5000/add-book', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ username, title, author, year, coverId })
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      const status = document.getElementById(`status-${idx}`);
+      const button = this;
+
+      status.style.display = 'block';     // Show the green "Added" text
+      button.style.display = 'none';      // Hide the "Add" button
+    } else {
+      alert('Failed to add book.');
+    }
+  }
+});
+
+      };
+    </script>
+  </body>
+</html>
