@@ -1,6 +1,6 @@
 ## IBDb 
 
-![alt text](frontend/public/IBDb.png)
+![IBDb](https://github.com/user-attachments/assets/a1f4be3f-bde3-45a8-9106-905aeae72f30)
 
 A Book Review CRUD App for people to login and logout, and for them to add their own books that they've read, that they can give a review of, write a description and so on. 
 
