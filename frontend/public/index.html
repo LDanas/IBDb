@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Knewave&display=swap" rel="stylesheet">  
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IMDb</title>
+  </head>
+  <body>
+
+        <img src="IBDb.png" alt="IBDb Logo" class="center-logo">
+    
+<video id="background-video" autoplay muted loop>
+<source src="Background.mp4" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+<style scoped>
+
+.center-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 200px;
+  z-index: 1;
+}
+
+
+#background-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+.book-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.book-card {
+  width: 90%;
+  max-width: 400px;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+}
+
+/* Mobile optimization */
+@media (max-width: 440px) {
+  .book-card {
+    font-size: 14px;
+  }
+
+}
+</style>
+
+
+  <div id="app"></div>
+  <!-- Vue will mount here -->
+</body>
+</html>
