@@ -41,13 +41,14 @@ app.post('/login', async (req, res) => {
   res.json({ token });
 });
 
-// Book schema
 const bookSchema = new mongoose.Schema({
   username: String,
   title: String,
   author: String,
   year: String,
   coverId: String,
+  notes: String,
+  rating: String // <-- add this line
 });
 const Book = mongoose.model('Book', bookSchema);
 
@@ -70,6 +71,17 @@ app.post('/delete-book', async (req, res) => {
   const { id } = req.body;
   try {
     await Book.findByIdAndDelete(id);
+    res.json({ success: true });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
+// Update Book Notes route
+app.post('/update-book', async (req, res) => {
+  const { id, notes, rating } = req.body; // <-- add rating here
+  try {
+    await Book.findByIdAndUpdate(id, { notes, rating }); // <-- update rating too
     res.json({ success: true });
   } catch (err) {
     res.json({ success: false, error: err.message });

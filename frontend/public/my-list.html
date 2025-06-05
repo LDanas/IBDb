@@ -54,16 +54,14 @@
     </style>
   </head>
   <body>
-    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 bg-opacity-60 relative z-10 pb-20">
+    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 bg-opacity-20 relative z-10 pb-20">
       <h1 class="text-3xl font-bold mb-6">My Book List</h1>
-    <div id="bookList" class="w-full flex flex-wrap justify-center gap-4 px-4 mt-8"></div>
+      <div id="bookList" class="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 px-4 mt-8"></div>
     </div>
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
       <button class="nav-btn btn-one" onclick="goTo('my-list.html')">My List</button>
       <button class="nav-btn btn-two" onclick="goTo('add-book.html')">Add a Book</button>
-      <button class="nav-btn btn-three" onclick="goTo('delete-book.html')">Delete a Book</button>
-      <button class="nav-btn btn-four" onclick="goTo('edit-book.html')">Edit a Book</button>
       <button class="nav-btn btn-profile" onclick="goTo('profile.html')">My Profile</button>
     </nav>
     <script>
@@ -81,31 +79,54 @@
         const res = await fetch(`http://localhost:5000/my-books?username=${encodeURIComponent(username)}`);
         const data = await res.json();
         const bookList = document.getElementById('bookList');
-        if (!data.books.length) {
-          bookList.innerHTML = '<p class="text-gray-700 text-center">No books in your list yet.</p>';
-          return;
-        }
-        bookList.innerHTML = data.books.map((book, idx) => {
-          const coverUrl = book.coverId
-            ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
-            : 'https://via.placeholder.com/80x120?text=No+Cover';
-          return `
-            <div class="bg-white bg-opacity-80 rounded shadow p-4 mb-4 flex items-center" id="book-row-${idx}">
-              <img src="${coverUrl}" alt="Book Cover" width="80" height="120" loading="lazy" class="w-20 h-28 object-cover rounded mr-4" />
-              <div class="flex-1">
-                <div class="font-bold">${book.title}</div>
-                <div class="text-sm text-gray-700">${book.author}</div>
-                <div class="text-xs text-gray-500">${book.year ? 'First published: ' + book.year : ''}</div>
-              </div>
-              <button class="ml-4 px-3 py-1 bg-red-500 text-white rounded remove-btn" 
-                data-id="${book._id}" data-idx="${idx}">
-                Remove
-              </button>
-            </div>
-          `;
-        }).join('');
+        const TOTAL_SLOTS = 20;
 
-        // Add event listeners for remove buttons
+        // Prepare array of 20 slots, fill with books or placeholders
+        let items = new Array(TOTAL_SLOTS).fill(null);
+
+        // Fill with book cards first
+        data.books.forEach((book, idx) => {
+          if (idx < TOTAL_SLOTS) {
+            const coverUrl = book.coverId
+              ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
+              : 'https://via.placeholder.com/80x120?text=No+Cover';
+            items[idx] = `
+              <div class="bg-white bg-opacity-80 rounded shadow p-4 flex items-center" id="book-row-${idx}">
+                <img src="${coverUrl}" alt="Book Cover" width="80" height="120" loading="lazy" class="w-20 h-28 object-cover rounded mr-4" />
+                <div class="flex-1">
+                  <div class="font-bold">${book.title}</div>
+                  <div class="text-sm text-gray-700">${book.author}</div>
+                  <div class="text-xs text-gray-500">${book.year ? 'First published: ' + book.year : ''}</div>
+                </div>
+                <div class="flex flex-col items-end ml-4">
+                  <button class="px-3 py-1 mb-2 bg-red-500 text-white rounded remove-btn w-full" 
+                    data-id="${book._id}" data-idx="${idx}">
+                    Remove
+                  </button>
+                  <button class="px-3 py-1 bg-lime-500 text-white rounded edit-btn w-full"
+                    data-id="${book._id}" data-idx="${idx}">
+                    Edit
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+        });
+
+        // Fill remaining slots with placeholders
+        for (let i = 0; i < TOTAL_SLOTS; i++) {
+          if (!items[i]) {
+            items[i] = `
+              <div class="bg-white bg-opacity-40 rounded shadow p-4 h-[180px] flex items-center justify-center">
+                <span class="text-gray-400">Empty</span>
+              </div>
+            `;
+          }
+        }
+
+        bookList.innerHTML = items.join('');
+
+        // Add event listeners only to valid books
         document.querySelectorAll('.remove-btn').forEach(btn => {
           btn.onclick = async function() {
             const bookId = this.dataset.id;
@@ -117,10 +138,20 @@
             });
             const result = await res.json();
             if (result.success) {
-              document.getElementById(`book-row-${idx}`).remove();
+              // Remove the book and re-fetch to keep placeholders in place
+              fetchBooks();
             } else {
               alert('Failed to remove book.');
             }
+          }
+        });
+
+        // After setting innerHTML and remove-btn listeners, add this for edit buttons:
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.onclick = function() {
+            const bookId = this.dataset.id;
+            // Redirect to edit page with book id as query param
+            window.location.href = `edit-book.html?id=${bookId}`;
           }
         });
       }

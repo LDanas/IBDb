@@ -31,22 +31,15 @@
         border-radius: 6px;
         cursor: pointer;
       }
-      .btn-one {
-        background: linear-gradient(90deg, #ff6a00 0%, #ee0979 100%);
-        color: #fff;
-      }
-      .btn-two {
-        background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
-        color: #fff;
-      }
-      .btn-three {
-        background: linear-gradient(90deg, #fc466b 0%, #3f5efb 100%);
-        color: #fff;
-      }
-      .btn-four {
-        background: linear-gradient(90deg, #f7971e 0%, #ffd200 100%);
+.btn-one {
+        background: linear-gradient(90deg, #FFC300 0%, #FFF8DC 100%);
         color: #222;
       }
+      .btn-two {
+        background: linear-gradient(90deg, #FFF8DC 10%,  #ffc400 100%);
+        color: #222;
+      }
+
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Knewave&display=swap" rel="stylesheet">
   </head>
@@ -61,8 +54,6 @@
       <div class="button-container">
         <button class="btn btn-one" onclick="goTo('my-list.html')">My List</button>
         <button class="btn btn-two" onclick="goTo('add-book.html')">Add a Book</button>
-        <button class="btn btn-three" onclick="goTo('delete-book.html')">Delete a Book</button>
-        <button class="btn btn-four" onclick="goTo('edit-book.html')">Edit a Book</button>
         <button onclick="logout()" class="btn bg-red-500 text-white mt-4">Logout</button>
       </div>
     </div>

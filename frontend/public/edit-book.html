@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Book | IBDb</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      min-height: 100vh;
+      background: linear-gradient(270deg, #FFD700, #FFB300, #FFF8DC, #FFC300);
+      background-size: 800% 800%;
+      animation: gradientFlow 18s ease infinite;
+    }
+    @keyframes gradientFlow {
+      0% {background-position: 0% 50%;}
+      25% {background-position: 50% 100%;}
+      50% {background-position: 100% 50%;}
+      75% {background-position: 50% 0%;}
+      100% {background-position: 0% 50%;}
+    }
+    /* Star rating CSS */
+    .rate {
+    display: flex;
+    flex-direction: row-reverse; /* Add this line */
+    justify-content: center;
+    align-items: center;
+    float: none;
+    margin-bottom: 1.5rem;
+    height: 46px;
+    padding: 0 10px;
+    }
+    .rate:not(:checked) > input {
+      position:absolute;
+      top:-9999px;
+    }
+    .rate:not(:checked) > label {
+      float:right;
+      width:1em;
+      overflow:hidden;
+      white-space:nowrap;
+      cursor:pointer;
+      font-size:48px;
+      color:#ccc;
+      transition: color 0.2s;
+    }
+    .rate:not(:checked) > label:before {
+      content: '★ ';
+    }
+    .rate > input:checked ~ label {
+      color: #ffc700;    
+    }
+    .rate:not(:checked) > label:hover,
+    .rate:not(:checked) > label:hover ~ label {
+      color: #deb217;  
+    }
+    .rate > input:checked + label:hover,
+    .rate > input:checked + label:hover ~ label,
+    .rate > input:checked ~ label:hover,
+    .rate > input:checked ~ label:hover ~ label,
+    .rate > label:hover ~ input:checked ~ label {
+      color: #c59b08;
+    }
+    /* For half stars */
+    .rate .half:before {
+      content: '★';
+      position: absolute;
+      color: #ffc700;
+      width: 50%;
+      overflow: hidden;
+      left: 0;
+    }
+    .rate .half {
+      position: relative;
+      width: 1em;
+      display: inline-block;
+      font-size: 48px;
+      color: #ccc;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen flex flex-col items-center justify-center">
+    <div id="bookInfo" class="w-full flex flex-col items-center mt-8"></div>
+    <div class="flex flex-col items-center justify-center mt-8 w-full">
+      <textarea id="notes" class="w-96 h-40 p-4 rounded border border-gray-300 text-black text-lg resize-none mb-4" placeholder="Write your notes or review here..."></textarea>
+      <!-- Star Rating -->
+<div class="rate" id="starRating">
+  <input type="radio" id="star1" name="rate" value="1" /><label for="star1" title="1 star"></label>
+  <input type="radio" id="star2" name="rate" value="2" /><label for="star2" title="2 stars"></label>
+  <input type="radio" id="star3" name="rate" value="3" /><label for="star3" title="3 stars"></label>
+  <input type="radio" id="star4" name="rate" value="4" /><label for="star4" title="4 stars"></label>
+  <input type="radio" id="star5" name="rate" value="5" /><label for="star5" title="5 stars"></label>
+</div>
+      <div class="flex flex-row items-center">
+        <button id="saveBtn" class="px-6 py-2 bg-lime-500 text-white rounded font-bold mr-2">Save</button>
+        <button id="goBackBtn" style="background: linear-gradient(90deg, #FFF8DC 0%, #FFC300 100%); color: #222; font-family: 'Arial Black', Arial, sans-serif; font-size: 1rem; border: none; border-radius: 6px; padding: 0.5rem 1.2rem; cursor: pointer; transition: transform 0.08s;" class="ml-2">Go Back</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Get book id from URL
+    const params = new URLSearchParams(window.location.search);
+    const bookId = params.get('id');
+    if (!bookId) {
+      document.body.innerHTML = '<p class="text-center text-red-500 mt-10">No book selected.</p>';
+      throw new Error('No book id');
+    }
+
+    // Fetch book info
+    async function loadBook() {
+      const res = await fetch(`http://localhost:5000/my-books?username=${encodeURIComponent(localStorage.getItem('username'))}`);
+      const data = await res.json();
+      const book = data.books.find(b => b._id === bookId);
+      if (!book) {
+        document.getElementById('bookInfo').innerHTML = '<p class="text-red-500">Book not found.</p>';
+        return;
+      }
+      const coverUrl = book.coverId
+        ? `https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg`
+        : 'https://via.placeholder.com/80x120?text=No+Cover';
+      document.getElementById('bookInfo').innerHTML = `
+        <img src="${coverUrl}" alt="Book Cover" class="w-32 h-48 object-cover rounded shadow mb-2" />
+        <div class="font-bold text-xl">${book.title}</div>
+        <div class="text-gray-700">${book.author}</div>
+        <div class="text-gray-500 text-sm">${book.year ? 'First published: ' + book.year : ''}</div>
+      `;
+      // Load existing notes if present
+      document.getElementById('notes').value = book.notes || '';
+      // Load existing rating if present
+      if (book.rating) {
+        const val = book.rating.toString();
+        const radio = document.querySelector(`input[name="rate"][value="${val}"]`);
+        if (radio) radio.checked = true;
+      }
+    }
+
+    loadBook();
+
+    // Save button handler (requires backend support for updating notes and rating)
+    document.getElementById('saveBtn').onclick = async () => {
+      const saveBtn = document.getElementById('saveBtn');
+      const notes = document.getElementById('notes').value;
+      const rating = document.querySelector('input[name="rate"]:checked')?.value || '';
+      const res = await fetch('http://localhost:5000/update-book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: bookId, notes, rating })
+      });
+      const result = await res.json();
+      if (result.success) {
+        await loadBook();
+        saveBtn.textContent = 'Saved';
+        saveBtn.disabled = true;
+        setTimeout(() => {
+          saveBtn.textContent = 'Save';
+          saveBtn.disabled = false;
+        }, 7000);
+      } else {
+        alert('Failed to save.');
+      }
+    };
+
+    // Go Back button handler
+    document.getElementById('goBackBtn').onclick = () => {
+      window.location.href = 'my-list.html';
+    };
+  </script>
+</body>
+</html>

@@ -48,13 +48,11 @@
       }
       .btn-one { background: linear-gradient(90deg, #FFD700 0%, #FFB300 100%); color: #222; }
       .btn-two { background: linear-gradient(90deg, #FFC300 0%, #FFF8DC 100%); color: #222; }
-      .btn-three { background: linear-gradient(90deg, #FFB300 0%, #FFD700 100%); color: #222; }
-      .btn-four { background: linear-gradient(90deg, #FFF8DC 0%, #FFC300 100%); color: #222; }
       .btn-profile { background: #B8860B; color: #fff; }
     </style>
   </head>
   <body>
-    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 bg-opacity-60 relative z-10 pb-20">
+    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 bg-opacity-30 relative z-10 pb-20">
       <h1 class="text-3xl font-bold mb-6">Add a Book</h1>
       <form id="searchForm" class="flex mb-6 w-full max-w-md">
         <input type="text" id="searchInput" class="flex-1 px-4 py-2 rounded-l border border-gray-300 focus:outline-none text-black" placeholder="Search for a book..." required />
@@ -66,8 +64,6 @@
     <nav class="bottom-nav">
       <button class="nav-btn btn-one" onclick="goTo('my-list.html')">My List</button>
       <button class="nav-btn btn-two" onclick="goTo('add-book.html')">Add a Book</button>
-      <button class="nav-btn btn-three" onclick="goTo('delete-book.html')">Delete a Book</button>
-      <button class="nav-btn btn-four" onclick="goTo('edit-book.html')">Edit a Book</button>
       <button class="nav-btn btn-profile" onclick="goTo('profile.html')">My Profile</button>
     </nav>
     <script>
@@ -95,8 +91,8 @@
           return;
         }
 
-        // Show results
-        resultsDiv.innerHTML = data.docs.slice(0, 10).map((book, idx) => {
+        // Limit to 20 results instead of 40
+        resultsDiv.innerHTML = data.docs.slice(0, 20).map((book, idx) => {
           const coverId = book.cover_i;
           let coverHtml;
           if (coverId) {
