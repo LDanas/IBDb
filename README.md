@@ -11,3 +11,5 @@ https://youtu.be/qzjU3blXvdY
 05/06/2025 ; 12:13 
 
 I added some Notes for myself on how to start up the server, meaning, opening my backend repository, opening a node server.js there, going back to the main folder, opening up a git bash there and running the mongod there too.
+
+![Notes](https://github.com/user-attachments/assets/01409c96-b895-44bb-8b6f-4815da2eed13)
